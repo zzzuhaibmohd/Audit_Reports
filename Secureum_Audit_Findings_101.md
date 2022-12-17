@@ -71,3 +71,76 @@ If any of the recipients of an ETH transfer is a smart contract that reverts, th
 **Recommendation**: allow buyers/sellers to initiate the withdrawal on their own using a ‘pull-over-push pattern.’ 
 
 ---
+### Whitelisted tokens limit
+
+function is iterating over all whitelisted tokens. If the number of tokens is too big, a transaction can run out of gas and all funds will be blocked forever.
+
+**Recommendation**: Limiting the number of whitelisted tokens or add a new type of proposal that is used to vote on token removal if the balance of this token is zero.
+
+---
+### Queued transactions cannot be canceled
+
+Only the admin can call Timelock.cancelTransaction. There are no functions in Governor that call Timelock.cancelTransaction.
+
+**Recommendation**: Add a function to the Governor that calls Timelock.cancelTransaction.
+
+---
+### Lack of chainID validation allows signatures to be re-used across forks
+
+Signatures used in calls to permit in ERC20Permit do not account for chain splits. The chainID is included in the domain separator. 
+if the chain forks after deployment, the signed message may be considered valid on both forks.
+
+**Recommendation**: include the chainID opcode in the permit schema.
+
+---
+### No incentive for bidders to vote earlier: 
+
+Hermez relies on a voting system that allows anyone to vote with any weight at the last minute. As a result, anyone with a large fund can manipulate the vote. 
+An attacker can know exactly how much currency will be necessary to change the outcome of the voting just before it ends.
+
+**Recommendation**: Consider a weighted bid, with a weight decreasing over time.
+
+---
+### Lack of two-step procedure for critical operations leaves them error-prone
+
+Several critical operations are done in one function call. This schema is error-prone and can lead to irrevocable mistakes.
+
+**Recommendation**: use a two-step procedure for all non-recoverable critical operations to prevent irrecoverable mistakes
+
+---
+### Failed transfer may be overlooked due to lack of contract existence check
+
+The pool fails to check that a contract exists, the pool may assume that failed transactions involving destructed tokens are successful.
+
+**Recommendation**: check the contract’s existence prior to the low-level call 
+
+---
+### System always assumes USDC is equivalent to USD
+
+implementation of the getRate method does not use the USDC-USD oracle provided by Chainlink; instead, it assumes 1 USDC is always worth 1 USD.
+
+**Recommendation**: replace the hard-coded integer literal in the getRate method with a call to the relevant Chainlink oracle
+
+---
+### Blacklisting Bypass via transferFrom() Function
+
+The transferFrom() function in the contract does not verify that the sender (i.e. the from address) if blacklisted.
+
+**Recommendation**: Implment check on the msg.sender and to addresses
+
+---
+### Lack of event emission after sensitive actions
+
+Contract does not emit relevant events after executing the sensitive actions of setting the fundingRate
+
+**Recommendation**: Consider emitting events after sensitive changes take place, to facilitate tracking and notify off-chain clients
+
+---
+### Governance parameter changes should not be instant
+
+Many sensitive changes can be made by any account with the WhitelistAdmin role via the functions and the changes are instantly applied without informing 
+the user.
+
+**Recommendation**: Consider implementing a time-lock mechanism for such changes to take place. By having a delay between the signal of intent and the actual change
+
+---
