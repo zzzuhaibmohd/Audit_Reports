@@ -1,0 +1,64 @@
+### UniswapConfig getters return wrong token config if token config does not exist (High)
+
+The UniswapConfig.getTokenConfigBySymbolHash function does not work as getSymbolHashIndex returns 0 if there is no config token for that symbol.
+This will always return the token config of the first index (index 0) which is a valid token config for a completely different token.
+
+**Recommendation**: Fix the non-existence check.
+
+---
+### Loans of tokens with >18 decimals can result in incorrect collateral calculation (Medium)
+
+Calculation within the collateralRequiredForDrawdown of LoanLib incorrectly assumes the collateral token of a loan to be less than 18 decimals
+This can cause an underflow to the power of 10 which will cause the division to yield 0 and thus cause the Loan to calculate 0 as collateral required for the loan.
+
+**Recommendation**: We advise the same paradigm as _toWad to be applied which is secure: LoanLib.sol#L247
+
+---
+### Users may unintendedly remove liquidity under a phishing attack. (High)
+
+The removeLiquidity function in Pools.sol uses tx.origin to determine the person who wants to remove liquidity.
+
+**Recommendation**: Consider making the function _removeLiquidity external, which can beutilized by the router, providing information of which person removes 
+his liquidity.
+
+---
+### Missing access restriction on lockUnits/unlockUnits (High)
+
+The Pool.lockUnits allows anyone to steal pool tokens from a member and assign them to msg.sender.
+
+**Recommendation**: Add access control and require that msg.sender is the router or another authorized party.
+
+---
+### Swap token can be traded as fake base token (High)
+
+The Pools.swap function does not check if base is one of the base tokens.
+It breaks the accounting for the pool as tokens are transferred in, but the base balance is increased (and token decreased). LPs cannot correctly
+withdraw again, and others cannot correctly swap again.
+
+**Recommendation**: Check that base is either USDV or VADER 
+
+---
+### Proposals can be cancelled (High)
+
+Anyone can cancel any proposals by calling DAO.cancelProposal(id, id) with oldProposalID == newProposalID.
+An attacker can launch a denial of service attack on the DAO governance and prevent any proposals from being executed.
+
+**Recommendation**: Check oldProposalID == newProposalID
+
+---
+### Canceled proposals can still be executed (Medium)
+
+A cancelled proposal only sets mapPID_votes to zero but mapPID_timeStart and mapPID_finalising stay the same and pass the checks in finaliseProposal which 
+queues them for execution.
+
+**Recommendation**: Set a cancel flag and check for it in finaliseProposal and in execution
+
+---
+### Canceled proposals can still be executed (Medium)
+
+A cancelled proposal only sets mapPID_votes to zero but mapPID_timeStart and mapPID_finalising stay the same and pass the checks in finaliseProposal which 
+queues them for execution.
+
+**Recommendation**: Set a cancel flag and check for it in finaliseProposal and in execution
+
+---
