@@ -62,3 +62,37 @@ queues them for execution.
 **Recommendation**: Set a cancel flag and check for it in finaliseProposal and in execution
 
 ---
+### pendingWithdrawals not decreased after a withdraw (High)
+
+The variable pendingWithdrawals in the contract Withdrawable is not decreased after the function withdraw is called, which causes the return
+value of function getReserveBalance less than it should be.
+
+**Recommendation**: Add pendingWithdrawals = pendingWithdrawals.sub(reserveAmount);
+
+---
+### Should check return data from Chainlink aggregators (Medium)
+
+The getEtherPrice function in the contract FSDNetwork fetches the ETH price from a Chainlink aggregator using the latestRoundData function.
+However, there are no checks on roundID nor timeStamp, resulting in stale prices.
+
+**Recommendation**: Add checks on the return data with proper revert messages
+
+---
+### Call to swapExactTokensForETH in liquidateDai() will always fail (Medium)
+
+Given that there is no prior approval, the call to UniswapV2 router for
+swapping will fail because msg.sender has not approved UniswapV2 with
+an allowance for the tokens being attempted to swap.
+
+**Recommendation**: Add FSD approval to UniswapV2 with an allowance for the tokens being attempted to swap.
+
+---
+### Call to swapExactTokensForETH in liquidateDai() will always fail (Medium)
+
+Given that there is no prior approval, the call to UniswapV2 router for
+swapping will fail because msg.sender has not approved UniswapV2 with
+an allowance for the tokens being attempted to swap.
+
+**Recommendation**: Add FSD approval to UniswapV2 with an allowance for the tokens being attempted to swap.
+
+---
