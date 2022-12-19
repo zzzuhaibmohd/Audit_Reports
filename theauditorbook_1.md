@@ -96,3 +96,41 @@ an allowance for the tokens being attempted to swap.
 **Recommendation**: Add FSD approval to UniswapV2 with an allowance for the tokens being attempted to swap.
 
 ---
+### Potential griefing with DoS by front-running vault creation with same vaultID (Medium)
+
+The vaultID for a new vault being built is required to be specified by the
+user building a vault via the build() function (instead of being assigned by
+the Cauldron/protocol).
+
+**Recommendation**: Mitigate this DoS vector by having the Cauldron assign the vauldID instead of user specifying it in the build() operation.
+
+---
+### Usage of deprecated ChainLink API in Buoy3Pool (Medium)
+
+The Chainlink API (latestAnswer) used in the Buoy3Pool oracle wrappers
+is deprecated:
+
+**Recommendation**: Add the recommended checks:
+
+---
+### Safe addresses can only be added but not removed (Medium)
+
+if there a safe listed integration that needs to be later disabled, it cannot be done.
+
+**Recommendation**: Change addSafeAddress() to isSafeAddress() with an additional bool parameter to allow both enabling/disabling of safe addresses.
+
+---
+### Using transferFrom on ERC721 tokens
+
+the transferFrom keyword is used instead of safeTransferFrom. If any winner is a contract and is not aware of incoming ERC721 tokens, the sent tokens could be locked.
+
+**Recommendation**: changing transferFrom to safeTransferFrom
+
+---
+### Return values of ERC20 transfer and transferFrom are unchecked (Medium)
+
+it could be false if the transferred tokens are not ERC20-compliant
+
+**Recommendation**: Use the SafeERC20 library
+
+---
