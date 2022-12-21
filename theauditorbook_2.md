@@ -73,11 +73,3 @@ the function will always return true, even if a market wishes to restrict its us
 **Recommendation**: consider adding a function that enables a market creator to restrict their market to a specific role by whitelisting users.
 
 ---
-### Uninitialized Variable marketWhitelist in RCTreasury.sol (Medium)
-
-The variable, marketWhitelist, is never initialized in the contract RCTreasury.sol.
-the function will always return true, even if a market wishes to restrict its users to a specific role.
-
-**Recommendation**: consider adding a function that enables a market creator to restrict their market to a specific role by whitelisting users.
-
----
