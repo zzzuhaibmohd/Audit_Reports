@@ -31,3 +31,38 @@ to claim the unlocked bonded LP tokens for any member.
 **Recommendation**: replace all member to msg.sender to allow only the user himself to claim unlocked bonded LP tokens.
 
 ---
+### Rewards can be migrated to an arbitrary address at anytime by owner (Medium)
+
+The migrateRewards() function which is onlyOwner takes recipient and
+amount parameters, which effectively allows owner to migrate the
+contract’s entire rewardToken balance at any time to that address.
+
+**Recommendation**: Evaluate the need for this function and avoid/mitigate risk appropriately.
+
+---
+### Chainlink - Use latestRoundData instead latestAnswer to run more validations (Medium)
+
+UniswapV3Oracle.sol is calling latestAnswer to get the last WETH price.
+This method will return the last value, but you won’t be able to check if the
+data is fresh.
+
+**Recommendation**: calling the method latestRoundData
+
+---
+### Missing events/timelocks for owner/admin only functions that change critical parameters (Medium)
+
+Owner/admin only functions that change critical parameters should emit events and have timelocks.
+Missing events and timelocks do not promote transparency.
+
+**Recommendation**: Add events to all owner/admin functions that change critical parameters.
+
+---
+### Missing events/timelocks for owner/admin only functions that change critical parameters (Medium)
+
+Owner/admin only functions that change critical parameters should emit events and have timelocks.
+Missing events and timelocks do not promote transparency.
+
+**Recommendation**: Add events to all owner/admin functions that change critical parameters.
+
+---
+
