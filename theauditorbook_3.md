@@ -75,3 +75,41 @@ governance/DAO address in future.
 **Recommendation**: Ensure admins are reasonably redundant/independent (3/7 or 5/9) multisigs and add transfer/renounce functionality for admin.
 
 ---
+### QuickAccManager.sol#cancel() Wrong hashTx makes it impossible to cancel a scheduled transaction (High)
+
+In QuickAccManager.sol#cancel(), the hashTx to identify the transaction to be canceled is wrong. The last parameter is missing.
+
+**Recommendation**: Change to: bytes32 hashTx = keccak256(abi.encode(address(this), block.chainid, accHash, nonce, txns, false));.
+
+---
+### No sanity check on pricePerShare might lead to lost value (Medium)
+
+pricePerShare is read either from an oracle or from ibBTC’s core.
+If one of these is bugged or exploited, there are no safety checks to prevent loss of funds.
+
+**Recommendation**: Add sanity check:
+
+--- 
+### unstake should update exchange rates first (High)
+
+The unstake function does not immediately update the exchange rates.
+It first computes the validatorSharesRemove = tokensToShares(amount, v.exchangeRate) with the old exchange rate.
+More shares for the amount are burned than required and users will lose rewards in the end.
+
+**Recommendation**: The exchange rates always need to be updated first before doing anything.
+
+---
+### Basket.sol#mint() Malfunction due to extra nonReentrant modifier (Medium)
+
+The mint() method is malfunction because of the extra nonReentrant modifier, as mintTo already has a nonReentrant modifier.
+
+**Recommendation**: remove nonReentrant modifier mint() method.
+
+--- 
+### createBasket re-entrancy (Medium)
+
+function createBasket in Factory should also be nonReentrant as it interacts with various tokens inside the loop and these tokens may contain callback hooks.
+
+**Recommendation**: Add nonReentrant modifier to the declaration of createBasket.
+
+---
