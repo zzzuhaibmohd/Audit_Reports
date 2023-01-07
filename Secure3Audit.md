@@ -23,3 +23,20 @@ id = 0.
 **Recommendation**:  move the require(user.settledRound != getLatestRoundId(), "already settled"); at the beginning of function settleOrder
 
 ---
+### The Problem of Signature Replay for Different Contracts and Chains
+
+The signed message in the current code lacks the important chainid and address(this) information, which
+makes the contract vulnerable to replay attacks at different addresses and different chains
+
+**Recommendation**:  Include the address of the contract that processes the message. This ensures that the message can only be used in
+a single contract. 
+
+---
+### NFT locking can be bypassed to be transferred
+
+XNFT contract overrides ERC721::transferFrom and adds a check to ensure that locked NFT will not be transferred. However, XNFT does not overrides ERC721::transfer and ERC721::safeTransferFrom to add the same restriction, so user can still transfer locked NFT by calling XNFT::transfer or
+XNFT::safeTransferFrom.
+
+**Recommendation**: add restriction to _beforeTokenTransfer function.
+
+---
