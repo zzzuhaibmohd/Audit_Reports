@@ -46,3 +46,28 @@ than was actually transferred. The tx will revert and these tokens cannot be use
 **Recommendation**: One possible mitigation is to measure the asset change right before and after the asset-transferring routines
 
 ---
+### Claim airdrop repeatedly (High)
+
+In the next part of the function, airdrop[msg.sender] is overwritten with fresh values and airdrop[msg.sender].claimed will be reset to 0.
+
+**Recommendation**: Add the following to validate() : require(validated[msg.sender]== 0,“Already validated.”);
+
+---
+### No Transfer Ownership Pattern (Medium)
+
+function checks the new owner is not the zero address and proceeds to write the new owner’s address into the owner’s state variable.
+
+**Recommendation**: Consider implementing a two step process where the owner nominates an account and the nominated account needs to call an acceptOwnership()
+
+---
+### Timelock can be bypassed (High)
+
+The purpose of a Timelock contract is to put a limit on the privileges of the
+governor, by forcing a two step process with a preset delay time.
+
+the current governor can call Timelock#setGovernor(address _governor) and set a new governor effective immediately.
+And the new governor can then call Timelock#setDelay() and change the delay to 0, also effective immediately.
+
+**Recommendation**: Consider making setGovernor and setDelay only callable from the Timelock contract itself.
+
+---
