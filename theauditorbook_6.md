@@ -1,5 +1,3 @@
-
-
 ### cancelPromotion is too rigorous (High)
 
 When you cancel a promotion with cancelPromotion() then the promotion
@@ -82,5 +80,10 @@ user doesn’t even have to be very sophisticated: they can just send one vote i
 to flip the vote.
 
 **Recommendation**: Make sure that going to 0 is equivalent to a flip, but going away from 0 isn’t a flip.
+
+---
+### The system can get to a “stuck” state if a bad proposal (proposal that can’t be executed) is accepted (Medium)
+
+The only way a proposal can be done and a new proposal can be registered is to finish the previous proposal by either accepting it and executing it or by rejecting it. 
 
 ---
