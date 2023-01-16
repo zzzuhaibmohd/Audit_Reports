@@ -56,3 +56,63 @@ The getPrice function fetches the price from Chainlink using latestRoundData, th
  Verify answer is indeed for the last known round.
 
 ---
+### 8. 88mph Function Initialization Bug
+
+The init() function, which is used to initialize the NFT contract on 88mph’s platform, was missing an access control modifier 'onlyOwner'.  
+The result of this unprotected function would have allowed a malicious attacker to have access to any user’s NFTs and deposits.
+
+**Recommendation**: 1. Add an onlyOwner modifier
+2. Add an initializer modifier
+
+---
+### 10. Sandwich attack due to hardcoded slippage
+
+The _swapUstToUnderlying function is used to swap Ust to underlying tokens. The argument exchange_underlying specifies the minimum number of underlying to be returned from the swap. Currently, this value is set to 0, so the function is subject to a sandwich attack.
+
+**Recommendation**: Add a slippage argument to the functions instead of hard-coded  0. 
+
+---
+### 11. Initialize function can be invoked multiple times.
+
+The implementation contract can initialize the _controller address multiple times on Managed contract even though it should only be allowed once.
+This means a compromised implementation can reinitialize the contract above and become the owner to complete the privilege escalation then drain the user's fund.  
+
+**Recommendation**: Use the  initializer modifier to protect the function from being reinitiated
+
+---
+### 12. A Typo leading to locking of Funds
+
+In Solidity, "==" checks if the value of two operands are equal or not. And "=" is used to set a certain value to variables.  
+ If a user calls unlock() multiple times, insurances[_id].amount will be subtracted multiple times. It will result in 'lockedAmount' being way smaller.
+ 
+**Recommendation**: Change "insurances[_id].status == false;" to "insurances[_id].status = false;"
+
+---
+### 13. Centralisation RIsk: Owner Of RoyaltyVault Can Take All Funds
+
+The owner of RoyaltyVault can set _platformFee to any arbitrary value (e.g. 100% = 10000) as there exists no upper limit while setting fees for the platform.
+As a result the owner can steal the entire contract balance and any future balances avoiding the splitter.
+ 
+**Recommendation**: This issue may be mitigated by adding a maximum value for the _platformFee. For example 5% or 10%.
+
+---
+### 14. Call Return is executed before 'require' check
+
+![image](https://user-images.githubusercontent.com/104667778/212737464-2654665c-3be1-4a2d-a766-99d8ea42c1e1.png)
+
+In _withdrawFromYieldPool function, The code checks transaction success after returning the transfer value and finishing execution.
+Therefore, the return value from the call is never checked to see if the call succeeded. So, Regardless of the success or failure of the call, the function will exit as if everything succeeded.
+ 
+**Recommendation**: Add the 'require' check for the call before returning the value.
+
+---
+### 15. Reentrancy Vulnerability due to violation of the Check-Effect-Interaction Pattern.
+
+![image](https://user-images.githubusercontent.com/104667778/212737644-01335e42-9666-4251-9ded-2d5363798275.png)
+
+The key to the vulnerability is that the `doTransferOut` method in the CEtherDelegator contract uses the call method to transfer tokens.
+As there is no gas limit in the call method,  it can be exploited to implement reentrancy attacks.
+ 
+**Recommendation**: Follow check-effect-interaction pattern in borrowFresh function.
+
+---
