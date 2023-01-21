@@ -116,3 +116,44 @@ As there is no gas limit in the call method,  it can be exploited to implement r
 **Recommendation**: Follow check-effect-interaction pattern in borrowFresh function.
 
 ---
+### 17. Lack of access control in the parameterize function of proposal contracts
+
+In BurnFlashStakeDeposit.sol the parameterize() function can be called by anyone setting all the Parameters state in the contract.
+This function deals with important governance decisions being executed and should only be called by the DAO.
+
+ 
+**Recommendation**: Add access modifiers to proposal details change, say anyone can create one, but only the author can subsequently modify it.
+
+---
+### 18. Reentrancy Guard Lacking in mint function.
+
+In CollateralizedDebt.sol, the mint() function calls _safeMint() which has a callback to the "to" address argument.
+Functions with callbacks should have reentrancy guards in place for protection against reentrancy attacks.
+ 
+**Recommendation**: Add a reentrancy guard modifier on the mint() function in CollateralizedDebt.sol 
+
+---
+### 19.  Lender can change NFT valuation oracle without borrower permission
+
+ When the lender updates loan parameters in the updateLoanParameters function, the function doesn't check if oracle is updated.
+ So, A malicious lender could pass in his own oracle after the loan becomes outstanding, and the change would be updated without any checks.
+ 
+**Recommendation**: Once a loan is agreed to, the oracle used should not change. Adding a check in the require statement that "params. oracle == cur. oracle" should solve it.
+
+---
+### 20.  Incorrect airdrop calculation
+
+ The underlying cause was that the getClaimableTokenAmountAndGammaToClaim() function determines the amount of ApeCoin to claim based on the number of NFT the caller owns. It doesn’t consider how long the caller owns those NFTs. The attacker took a flash loan and borrowed BAYC tokens that can be redeemed for NFTs, and then use these NFTs to claim the AirDrop. 
+ 
+**Recommendation**: The attack could have been avoided if the airdrop calculation had taken into consideration how long a person had to own the NFT before claiming the reward.
+
+---
+### 21. Tokens with more than 18 decimal points will cause issues
+
+It is assumed that the maximum number of decimals for each token is 18. However,  It is possible to have tokens with more than 18 decimals like YAMv2 (24 decimals).
+The contract uses solidity version 0.7.6  which is prone to overflow and underflow.
+While calculating the rate in the getSellRate function, The decimal of Token is subtracted from 18. But if the token has more decimals than 18, It can result in broken code flow and underflow.
+  
+**Recommendation**: Make sure the code won’t fail in case the token’s decimals are  more than 18.
+
+---
