@@ -41,3 +41,20 @@ Owner can trigger emergency mode, perform emergency withdrawal operations withou
 executing function.
 
 ---
+### 6. Emergency mode enable/disable issue (Medium)
+
+Owner can trigger emergency mode, perform emergency withdrawal operations without any restrictions and then disable emergency mode.
+
+**Recommendation**: It is recommended to remove bool trigger parameter from triggerEmergencyWithdraw function and set emergency to true after successfully 
+executing function.
+
+---
+### 7. First depositor can break minting of shares (High)
+
+users may not receive shares in exchange for their deposits if the total asset amount has been manipulated through a large “donation”.
+
+**Recommendation**: Uniswap V2 solved this problem by sending the first 1000 LP tokens
+to the zero address. The same can be done in this case i.e. when
+totalSupply() == 0,
+
+---
