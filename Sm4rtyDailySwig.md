@@ -182,3 +182,44 @@ An attacker purchased the tokens and then used the public burn function to burn 
 **Recommendation**: This might have been avoided if the function had implemented access control, such as onlyOwner, or if the function was internal with proper access control logic.
 
 ---
+### 26. Bad Source of Randomness
+
+ In LuckyTigerNFT's Contract, _getRandom function is used to generate random numbers, which is called in the mint function while minting NFT.
+ The _getRandom function is using block.difficulty and block.timestamp for generating random numbers.
+ Now, Due to bad randomness we can predict it and mint the NFT Infinite times.
+ 
+**Recommendation**: Use Chainlink VRF to generate random numbers.
+
+---
+### 27. Arbitrary token burn
+
+ In the redeem function, while redeeming the function burns shares from a user-supplied address account instead of the user's account(msg.sender)
+ Also the redeem() function checks the balance of msg.sender, but burns from the balance of user supplied 'o' address.
+ Due to which a malicious user can burn all other's user shares by having the necessary shares on her balance.
+ 
+**Recommendation**:Consider burning the shares from msg.sender instead
+
+---
+### 28. Users can get unlimited Votes
+
+ In the Voting Escrow contract, When minting a token, voting rights are added to the owner's delegate using _moveTokenDelegates. Also while transferring the tokens _moveTokenDelegates is called to transfer voting rights.
+ But when burning a token, the token is not removed from the delegate's list. This can can allow any attacker to keep their votes even after burning the tokens.
+ 
+**Recommendation**: Call _moveTokenDelegates(owner,address(0)) in _burn() function
+
+---
+### 29.  Incorrect number of seconds in ONE_YEAR variable
+
+ In HolyPaladinToken.sol the ONE_YEAR variable claims that there are 31557600 seconds in a year when this is incorrect. The correct number of seconds in a year is 31_536_000.
+ 
+**Recommendation**: The 'ONE_YEAR' variable should be changed to 31_536_000
+
+---
+### 30.  Unnecessary precision loss in _recipientBalance()
+
+In Steam.sol contract, Using ratePerSecond() to calculate the _recipientBalance() incurs an unnecessary precision loss.
+The current formula in _recipientBalance() to calculate the vested amount (balance) incurs an unnecessary precision loss, as it includes div before multiply. 
+
+**Recommendation**: Change the code to: "balance = elapsedTime_ * tokenAmount_ / duration"
+
+---
