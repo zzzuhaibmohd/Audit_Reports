@@ -157,3 +157,28 @@ While calculating the rate in the getSellRate function, The decimal of Token is 
 **Recommendation**: Make sure the code won’t fail in case the token’s decimals are  more than 18.
 
 ---
+### 22. Cannot unpause exchange
+
+The OneInchExchange.sol contract exposes a mechanism for the owner to pause the contract. This disables the swap functionality.
+But the problem is that there is no corresponding mechanism to unpause the contract. This can be problematic and can shutdown the swap functionality permanently.
+  
+**Recommendation**: Introducing a mechanism for the owner to unpause the contract.
+
+---
+### 24. Usage of deprecated ChainLink API
+
+According to Chainlink's documentation, the latestAnswer function is deprecated. The contracts of Gro protocol were using Chainlink’s deprecated API latestAnswer().
+
+![image](https://user-images.githubusercontent.com/104667778/215552408-9b0d913b-b842-49cc-b44c-2162de2c505f.png)
+
+**Recommendation**: Use the latestRoundData function to get the price instead.
+
+---
+### 25.  Lack of Access control over burn function 
+
+Hospowise was hacked due to an access control flaw, i.e. the burn function was public and was accessible to any user. 
+An attacker purchased the tokens and then used the public burn function to burn all the hospo tokens on UniSwap, inflating the token's value, and then finally swapped it for ETH until the pool was depleted.
+
+**Recommendation**: This might have been avoided if the function had implemented access control, such as onlyOwner, or if the function was internal with proper access control logic.
+
+---
