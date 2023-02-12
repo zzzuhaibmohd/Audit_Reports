@@ -223,3 +223,87 @@ The current formula in _recipientBalance() to calculate the vested amount (balan
 **Recommendation**: Change the code to: "balance = elapsedTime_ * tokenAmount_ / duration"
 
 ---
+### 31. Reward Manager of the Convex Base Reward Pool Can DoS processYield()
+
+Rewards are paid out in native CRV and CVX tokens but the reward manager of the base pool may opt to add extra rewards via addExtraRewards() function.
+In processYield() function, getting the value from `extraRewardsLength` function. If the value of extraRewards is big, the gas cost to execute this function is so high that the function will revert causing Denial of Service. 
+
+**Recommendation**: Consider restricting the number of extra rewards by only iterating through the first X number of tokens in processYield().
+
+---
+### 32. Low-level transfer via call() can fail silently
+
+The low-level functions call, delegatecall and staticcall return true as their first return value if the account called is non-existent, as part of the design of the EVM. Account existence must be checked prior to calling if needed.
+In the _call() function in TimelockController.sol, a call is executed without checking for the contract existence. Therefore, transfers may fail silently.
+ 
+**Recommendation**: Check for the account's existence prior to transferring.
+
+---
+### 33. ERC20 bridging functions do not revert on non-zero msg.value
+
+A user wanting to bridge ERC20 tokens would lose all ETH accidentally send to the contract. The bridging facets follow the pattern of checking if the token is native or ERC20.  In case the token is ERC20, there is no check that msg.value == 0.
+This leads to the ETH sent accidentally by a user being held unaccounted for in the contract and being lost for the user.
+ 
+**Recommendation**: Consider reverting when bridging functions with non-native target are called with non-zero native amount added.
+
+---
+### 34. User can escape from paying fees
+
+The addExcluded() function in Vader contract is used to exempt any user address to pay any fees. This function can be called by anyone, due to which anyone can map their own address.
+ 
+**Recommendation**: Add access control modifier
+
+---
+### 35. The noContract modifier does not work as expected.
+
+According to the docs, the noContract() Modifier ensures that non-whitelisted contracts can't interact with the LP farm.
+It can be bypassed when deploying a smart contract through the smart contract's constructor call.
+ 
+**Recommendation**: Modify the code to 'require(msg.sender == tx.origin);'
+
+---
+### 36. Sandwich attacks are possible as there is no slippage control
+
+Swapping function in Marketplace and Lender's yield() can be sandwiched as there is no slippage control option. Trades can happen at a manipulated price and end up receiving fewer tokens than current market price dictates.
+ 
+**Recommendation**: Consider adding minimum accepted return argument and slippage arguments to sustain the sandwich attacks to an extent. 
+
+---
+### 37. No checked success for Oracle
+
+In removeCollateral() function, the success return of loanParams. oracle. get() is ignored. Making it possible for the loan to be liquidated unfairly with an invalid or stale price.
+ 
+**Recommendation**: Consider adding a check for "success".
+
+---
+### 38. HolyPaladinToken.sol uses ERC20 token with a highly unsafe pattern
+
+The transferFrom() function in ERC20.sol used by HolyPaladinToken.sol calls _transfer() first and then updates the sender allowance which is unsafe. The openZeppelin ER20.sol contract first updates the sender allowance before calling _transfer.
+The transferFrom() function itself does not make any external calls so there is no exposure to reentrancy issues. But in the future if the contract is been extended in a way that enable an external call this would prove problematic.
+ 
+**Recommendation**: Consider importing the Open Zeppelin ERC20.sol contract code directly as it is battle tested and safe code.
+
+---
+### 39. HolyPaladinToken.sol uses ERC20 token with a highly unsafe pattern
+
+The transferFrom() function in ERC20.sol used by HolyPaladinToken.sol calls _transfer() first and then updates the sender allowance which is unsafe. The openZeppelin ER20.sol contract first updates the sender allowance before calling _transfer.
+The transferFrom() function itself does not make any external calls so there is no exposure to reentrancy issues. But in the future if the contract is been extended in a way that enable an external call this would prove problematic.
+ 
+**Recommendation**: Consider importing the Open Zeppelin ERC20.sol contract code directly as it is battle tested and safe code.
+
+---
+### 40. No upper limit for selling fees (Exit Scam)
+
+The transferFrom() function in ERC20.sol used by HolyPaladinToken.sol calls _transfer() first and then updates the sender allowance which is unsafe. The openZeppelin ER20.sol contract first updates the sender allowance before calling _transfer.
+The transferFrom() function itself does not make any external calls so there is no exposure to reentrancy issues. But in the future if the contract is been extended in a way that enable an external call this would prove problematic.
+ 
+**Recommendation**: rug pull-detection
+
+---
+### 41. Division before multiplication
+
+If interestPerSec is greater than 0, there will still be rounding errors due to division before multiplication. As a result, calculatedInterest() will be underestimated.
+
+**Recommendation**: This issue may be resolved by performing the multiplication by elapsedTime before the division by the denominator or 365 days.
+
+---
