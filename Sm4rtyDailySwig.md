@@ -307,3 +307,37 @@ If interestPerSec is greater than 0, there will still be rounding errors due to 
 **Recommendation**: This issue may be resolved by performing the multiplication by elapsedTime before the division by the denominator or 365 days.
 
 ---
+### 43. Protocol pays swap fees instead of users.
+
+PaprController implements the buyAndReduceDebt() function, which allows users to buy Papr tokens for underlying tokens and burn them to reduce their debt.
+The function allows the caller to specify a swap fee, a fee that is supposed to be collected from the caller. But the fee is collected from PaprController itself as it uses transfer instead of transferFrom on the underlying token.
+
+![image](https://user-images.githubusercontent.com/104667778/220969035-384971b5-e2a1-42dc-811a-19e75d5d51a9.png)
+
+
+**Recommendation**: Use the safeTransferFrom() function instead of transfer(). This way the fees will be transferred from msg.sender to swapFeesTo and would revert on failure.
+
+---
+### 44. call() should be used instead of transfer() on an address payable
+
+The transfer() and send() functions forward a fixed amount of 2300 gas. Historically, it has often been recommended to use these functions for value transfers to guard against reentrancy attacks.
+The use of the deprecated transfer() function for an address will inevitably make the transaction fail when the claimer smart contract does implement a payable fallback which uses more than 2300 gas unit.
+
+**Recommendation**: Use call() instead of transfer(), but be sure to use the CEI pattern and/or add re-entrancy guards, as several hacks already happened in the past due to this recommendation not being fully understood.
+
+---
+### 45. Dust amounts can cause payments to fail, leading to default
+
+In Cooler.sol, When repay() is called and repaid is greater than loan.amount then the function will go into the else statement. Here loan.amount is deducted the value of repaid. If repaid is greater than loan.value then the function will revert. the subtraction marked below will underflow, reverting the payment.
+
+**Recommendation**:Only collect and subtract the minimum of the current loan balance, and the amount specified in the repaid variable
+
+---
+### 46. Votes can be amplified due to insufficient checks
+
+The voters can increase their community voting power when they vote on an active proposal using castVote() function. But, There is no check if a user has 0 votes in the function. For each time user make a vote, the value of totalCommunityScoreData.votes and userCommunityScoreData[_voter] will increase by 1.
+This could lead to amplification of votes and an attacker could use a large number of addresses to vote with zero votes to drain the vault.
+
+**Recommendation**: castVote should revert if msg.sender doesn't have any votes. Also there should exist check for if votes is more than 0.
+
+---
