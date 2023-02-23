@@ -341,3 +341,46 @@ This could lead to amplification of votes and an attacker could use a large numb
 **Recommendation**: castVote should revert if msg.sender doesn't have any votes. Also there should exist check for if votes is more than 0.
 
 ---
+### 47. Anyone can spend on behalf of roller periphery
+
+The RollerPeriphery contract's approve method allows anyone to steal its ERC20 tokens. It does not have any access control, So, anyone call approve() which would make an ERC20 approve call to the token inputed, and allowing the 'to' address to spend.
+
+**Recommendation**: Add access control to the approve method so only an admin or allowed addresses can use it.
+
+---
+### 48. Lack of Access control on Minting tokens.
+
+The mintFromStaking() function is used to mint DMC tokens, but the problem is this function lacked any access control. The visibility modifier was set to external allowing anyone to mint tokens to their address.
+
+**Recommendation**: Adding access control modifiers like onlyOwner would have prevented the hack.
+
+---
+### 50. Incorrect Validation leading to a DOS attack
+
+The code in the transferLPs function has an incorrect validation check, where it requires allowances_ to be strictly equal to lenderLpBalance, instead of just allowances_ being greater than transferAmount.
+
+**Recommendation**: The validation check in the transferLPs function should be updated to allow for allowances_ to be greater than transferAmount, rather than requiring them to be strictly equal.
+
+---
+### 51.  Pool Manager can front-run fees to 100%
+
+Anyone can create a pool, including the pool manager. However, the pool manager is not considered a trusted actor. Pool Manager can front-run entry fee to 100% and users could lose all their deposits. There is no upper limit for setting the fee amount, meaning that it can be set as high as 100%. There should be a limit set for changing fees like 5% or 10%.
+
+**Recommendation**: Add a timelock to change fees. In that way, frontrunning wouldn’t be possible and users would know the fees they are agreeing with.
+
+---
+### 52.  Precision loss due to division before multiplication
+
+The _calculateNewRewards function calculates the new rewards for a staker by first dividing interestEarned_ by totalInterestEarnedInPeriod and then multiplying by totalBurnedInPeriod.If interestEarned_ is small enough and totalInterestEarnedInPeriod is large enough, the division may result in a value of 0, resulting in the staker receiving 0 rewards due to precision loss.
+
+**Recommendation**: Consider calculating the new rewards by first multiplying interestEarned_ by totalBurnedInPeriod and then dividing by totalInterestEarnedInPeriod to avoid precision loss.
+
+---
+### 53.  NFT to be frozen in a contract that does not support ERC721
+
+There are certain smart contracts that do not support ERC721, using transferFrom() may result in the NFT being sent to such contracts.
+if the _to address is a contract address that does not support ERC721, the NFT can become frozen in the contract.
+
+**Recommendation**: Consider using safeTransferFrom() instead of transferFrom().
+
+---
